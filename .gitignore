@@ -1,6 +1,5 @@
-.fable/
 .fake/
-.ionide/
+.farmer/
 live/
 node_modules/
 paket-files/

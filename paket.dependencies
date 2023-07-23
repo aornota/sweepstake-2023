@@ -6,14 +6,13 @@ group build
     framework: net6.0
     storage: none
 
+	nuget Farmer
     nuget FSharp.Core 6.0.0.0
     nuget Fake.Core.Environment
     nuget Fake.Core.Target
     nuget Fake.Core.Trace
     nuget Fake.DotNet.Cli
     nuget Fake.IO.FileSystem
-    nuget Fake.IO.Zip
-    github CompositionalIT/fshelpers src/FsHelpers/ArmHelper/ArmHelper.fs
 
 group server
 

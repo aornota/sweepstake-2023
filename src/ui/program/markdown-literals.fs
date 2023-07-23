@@ -81,7 +81,7 @@ let [<Literal>] PAYOUTS_MARKDOWN = """##### **Payouts:**
 + **£TBC** for first place
 + **£TBC** for second place
 + **£TBC** for third place
-+ **£TBC** for _**la cuillère en bois**_"""
++ **£TBC** for _la cuillère en bois_"""
 
 let [<Literal>] MARKDOWN_SYNTAX_MARKDOWN = """# Markdown syntax
 ### A very quick introduction

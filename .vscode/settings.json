@@ -4,6 +4,7 @@
 	, "files.exclude": {
 		".config/": true
 		, ".fake/": true
+		, ".farmer/": true
 		, ".paket/": true
 		, "fable_modules": true
 		, "live": true

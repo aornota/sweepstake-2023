@@ -6,39 +6,35 @@
 #endif
 
 #load "./.fake/build.fsx/intellisense.fsx"
-#load "paket-files/build/CompositionalIT/fshelpers/src/FsHelpers/ArmHelper/ArmHelper.fs"
 
 open System
-open System.Net
 
 open Fake.Core
 open Fake.Core.TargetOperators
 open Fake.DotNet
 open Fake.IO
-open Fake.IO.Globbing.Operators
 open Fake.IO.FileSystemOperators
 
-open Cit.Helpers.Arm
-open Cit.Helpers.Arm.Parameters
+open Farmer
+open Farmer.Builders
 
-open Microsoft.Azure.Management.ResourceManager.Fluent.Core
-
-type ArmOutput = { WebAppName : ParameterValue<string> ; WebAppPassword : ParameterValue<string> }
-
-type TimeoutWebClient() =
-    inherit WebClient()
-    override this.GetWebRequest(uri) =
-        let request = base.GetWebRequest(uri)
-        request.Timeout <- 30 * 60 * 1_000
-        request
-
-let mutable private deploymentOutputs : ArmOutput option = None
+[<Literal>]
+let private APPLICATION_NAME = "sweepstake-2012"
 
 let private serverDir = Path.getFullName "./src/server"
 let private uiDir = Path.getFullName "./src/ui"
 let private uiPublishDir = uiDir </> "publish"
 let private publishDir = Path.getFullName "./publish"
 let private publishPublicDir = publishDir </> "public"
+
+let private webapp = webApp {
+    name APPLICATION_NAME
+    sku WebApp.Sku.F1
+    zip_deploy publishDir }
+
+let private deployment = arm {
+    location Location.NorthEurope
+    add_resource webapp }
 
 let private platformTool tool winTool =
     let tool = if Environment.isUnix then tool else winTool
@@ -103,54 +99,9 @@ Target.create "publish-ui-azure" (fun _ ->
     buildUi true
     publishUi ())
 Target.create "publish" ignore
+Target.create "publish-azure" ignore
 
-Target.create "publish-azure" (fun _ ->
-    let persistedDir, publishPersistedDir = Path.getFullName "./live/persisted", publishDir </> "persisted"
-    let secretDir, publishSecretDir = Path.getFullName "./live/secret", publishDir </> "secret"
-    Shell.copyDir publishPersistedDir persistedDir FileFilter.allFiles
-    Shell.copyDir publishSecretDir secretDir FileFilter.allFiles
-    let zipFile = "deploy.zip"
-    IO.File.Delete(zipFile)
-    Zip.zip publishDir zipFile !!(publishDir + @"\**\**"))
-
-(* Target.create "arm-template" (fun _ ->
-    let armTemplate = "arm-template.json"
-    let environment = "sweepstake-2022"
-    let authCtx =
-        let subscriptionId = Guid("9ad207a4-28b9-48a4-b6ba-710c35034343") // azure-djnarration
-        let clientId = Guid("54edaac3-4a34-4a77-b8c7-96203481ed48") // sweepstake-2022 [Azure AD application registration]
-        let tenantId = Guid("39a59a1a-2733-4a43-8865-075ddc3edb85") // sweepstake-2022 [Azure AD application registration]
-        Trace.tracefn "Deploying template '%s' to resource group '%s' in subscription '%O'..." armTemplate environment subscriptionId
-        authenticateDevice Trace.trace { ClientId = clientId ; TenantId = Some tenantId } subscriptionId |> Async.RunSynchronously
-    let deployment =
-        let location = Region.UKSouth.Name
-        let pricingTier = "F1"
-        { DeploymentName = environment
-          ResourceGroup = New(environment, Region.Create location)
-          ArmTemplate = IO.File.ReadAllText(armTemplate)
-          Parameters =
-              Simple
-                  [ "environment", ArmString environment
-                    "location", ArmString location
-                    "pricingTier", ArmString pricingTier ]
-          DeploymentMode = Incremental }
-    deployment
-    |> deployWithProgress authCtx
-    |> Seq.iter (function
-        | DeploymentInProgress(state, operations) -> Trace.tracefn "State is %s; completed %d operations" state operations
-        | DeploymentError(statusCode, message) -> Trace.traceError (sprintf "Deployment error: %s -> '%s'" statusCode message)
-        | DeploymentCompleted d -> deploymentOutputs <- d))
-
-Target.create "deploy-azure" (fun _ ->
-    let zipFile = "deploy.zip"
-    IO.File.Delete(zipFile)
-    Zip.zip publishDir zipFile !!(publishDir + @"\**\**")
-    let appName = deploymentOutputs.Value.WebAppName.value
-    let appPassword = deploymentOutputs.Value.WebAppPassword.value
-    let destinationUri = sprintf "https://%s.scm.azurewebsites.net/api/zipdeploy" appName
-    let client = new TimeoutWebClient(Credentials = NetworkCredential("$" + appName, appPassword))
-    Trace.tracefn "Uploading %s to %s..." zipFile destinationUri
-    client.UploadData(destinationUri, IO.File.ReadAllBytes(zipFile)) |> ignore) *)
+Target.create "deploy-azure" (fun _ -> deployment |> Deploy.execute APPLICATION_NAME Deploy.NoParameters |> ignore)
 
 Target.create "help" (fun _ ->
     printfn "\nThese useful build targets can be run via 'fake build -t {target}':"
@@ -174,6 +125,6 @@ Target.create "help" (fun _ ->
 "clean-ui-publish" ==> "publish-ui-azure"
 "clean-publish" ==> "publish-ui-azure" ==> "publish-azure"
 
-(* "publish-azure" ==> "arm-template" ==> "deploy-azure" *)
+"publish-azure" ==> "deploy-azure"
 
 Target.runOrDefaultWithArguments "help"
