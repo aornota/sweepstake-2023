@@ -19,7 +19,7 @@ open Farmer
 open Farmer.Builders
 
 [<Literal>]
-let private APPLICATION_NAME = "sweepstake-2012"
+let private APPLICATION_NAME = "sweepstake-2023"
 
 let private serverDir = Path.getFullName "./src/server"
 let private uiDir = Path.getFullName "./src/ui"
