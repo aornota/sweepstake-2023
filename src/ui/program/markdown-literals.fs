@@ -20,7 +20,7 @@ Where multiple possible scores are given above, the score will depend on whether
 
 The top 8 seeds are (in order): South Africa; New Zealand; England; Wales; Ireland; Australia; France; and Japan.
 
-The remaining teams are: Argentina; Fiji; Georgia; Italy; Japan; Namibia; Portugal; Romania; Samoa; Scotland; Tonga; and Uruguay.
+The remaining teams are: Argentina; Chile; Fiji; Georgia; Italy; Namibia; Portugal; Romania; Samoa; Scotland; Tonga; and Uruguay.
 
 The team can earn _up to two_ bonus points (weighted as outlined above) for:
 + scoring 4 or more tries in a match
