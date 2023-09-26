@@ -76,12 +76,11 @@ And for the third round, **neph** and **rosie** have uncontested picks (Saki and
 ---
 It's not a perfect algorithm by any means. But it's the best I've been able to come up with..."""
 
-// TODO-2023: Confirm payouts...
 let [<Literal>] PAYOUTS_MARKDOWN = """##### **Payouts:**
-+ **£TBC** for first place
-+ **£TBC** for second place
-+ **£TBC** for third place
-+ **£TBC** for _la cuillère en bois_"""
++ **£60** for first place
++ **£40** for second place
++ **£20** for third place
++ **£10** for _la cuillère en bois_"""
 
 let [<Literal>] MARKDOWN_SYNTAX_MARKDOWN = """# Markdown syntax
 ### A very quick introduction
